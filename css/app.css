@@ -231,7 +231,7 @@ field {
   width: 800px;
   height: 800px;
   position: relative;
-  background-image: url("assets/img/baseball-field-clipart-field.jpg");
+  background-image: url("/assets/img/baseball-field-clipart-field.jpg");
   background-size: 100%;
   background-repeat: no-repeat;
   text-align: center;

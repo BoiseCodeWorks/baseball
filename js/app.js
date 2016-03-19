@@ -128,43 +128,16 @@
     };
   }
 })();
-"use strict";
+'use strict';
 
 (function () {
   'use strict';
+  //var baseUrl = window.location.hostname === "localhost" ? "http://localhost:63801" : "http://bcw-baseball.azurewebsites.net";
 
-  var baseUrl = window.location.hostname === "localhost" ? "http://localhost:63801" : "http://api.boisecodeworks.com/";
+  var baseUrl = "http://bcw-baseball.azurewebsites.net";
   angular.module('resources', ['js-data']).config(["DSHttpAdapterProvider", "DSFirebaseAdapterProvider", function (DSHttpAdapterProvider, DSFirebaseAdapterProvider) {
     DSHttpAdapterProvider.defaults.basePath = baseUrl + "/api";
     DSFirebaseAdapterProvider.defaults.basePath = 'https://bcw-bcc.firebaseio.com/';
-  }]).run(["DS", "DSHttpAdapter", "DSFirebaseAdapter", "Uow", function (DS, DSHttpAdapter, DSFirebaseAdapter, Uow) {
-    // the firebase adapter was already registered
-    DS.adapters.firebase === DSFirebaseAdapter;
-    // but we want to make it the default
-    DS.registerAdapter('firebase', DSFirebaseAdapter, { default: false });
-
-    // Activate a mostly auto-sync with Firebase
-    // The only thing missing is auto-sync TO Firebase
-    // This will be easier with js-data 2.x, but right
-    // now you still have to do DS.update('user', 1, { foo: 'bar' }), etc.
-    angular.forEach(DS.definitions, function (Resource) {
-      var ref = DSFirebaseAdapter.ref.child(Resource.endpoint);
-      // Inject items into the store when they're added to Firebase
-      // Update items in the store when they're modified in Firebase
-      ref.on('child_changed', function (dataSnapshot) {
-        var data = dataSnapshot.val();
-        if (data[Resource.idAttribute]) {
-          Resource.inject(data);
-        }
-      });
-      // Eject items from the store when they're removed from Firebase
-      ref.on('child_removed', function (dataSnapshot) {
-        var data = dataSnapshot.val();
-        if (data[Resource.idAttribute]) {
-          Resource.eject(data[Resource.idAttribute]);
-        }
-      });
-    });
   }]).factory('Uow', ["Games", "Teams", "Players", function (Games, Teams, Players) {
     return {
       Games: Games,
@@ -231,6 +204,34 @@
     });
 
     return store;
+  }]).run(["DS", "DSHttpAdapter", "DSFirebaseAdapter", "Uow", function (DS, DSHttpAdapter, DSFirebaseAdapter, Uow) {
+    // // the firebase adapter was already registered
+    // DS.adapters.firebase === DSFirebaseAdapter;
+    // // but we want to make it the default
+    // DS.registerAdapter('firebase', DSFirebaseAdapter, { default: false });
+
+    // // Activate a mostly auto-sync with Firebase
+    // // The only thing missing is auto-sync TO Firebase
+    // // This will be easier with js-data 2.x, but right
+    // // now you still have to do DS.update('user', 1, { foo: 'bar' }), etc.
+    // angular.forEach(DS.definitions, function(Resource) {
+    //   var ref = DSFirebaseAdapter.ref.child(Resource.endpoint);
+    //   // Inject items into the store when they're added to Firebase
+    //   // Update items in the store when they're modified in Firebase
+    //   ref.on('child_changed', function(dataSnapshot) {
+    //     var data = dataSnapshot.val();
+    //     if (data[Resource.idAttribute]) {
+    //       Resource.inject(data);
+    //     }
+    //   });
+    //   // Eject items from the store when they're removed from Firebase
+    //   ref.on('child_removed', function(dataSnapshot) {
+    //     var data = dataSnapshot.val();
+    //     if (data[Resource.idAttribute]) {
+    //       Resource.eject(data[Resource.idAttribute]);
+    //     }
+    //   });
+    // });
   }]);
 })();
 'use strict';
