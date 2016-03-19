@@ -51,6 +51,7 @@
     //Lets just work with the one game we have
     var gameId = 1;
     Games.find(gameId).then(function (data) {
+
       _this.game = data;
       console.dir(data);
     });
@@ -148,6 +149,7 @@
     return DS.defineResource({
       name: 'game',
       endpoint: 'games',
+
       computed: {
         players: {
           get: function get() {
@@ -189,11 +191,11 @@
         belongsTo: {
           team: {
             localKey: 'teamId',
-            localField: 'team'
+            localField: 'team',
+            parent: true
           }
         }
       },
-      //parent: true
       saveAll: function saveAll() {
         store.getAll().filter(function (x) {
           return x.DSHasChanges();
@@ -205,33 +207,27 @@
 
     return store;
   }]).run(["DS", "DSHttpAdapter", "DSFirebaseAdapter", "Uow", function (DS, DSHttpAdapter, DSFirebaseAdapter, Uow) {
-    // // the firebase adapter was already registered
-    // DS.adapters.firebase === DSFirebaseAdapter;
-    // // but we want to make it the default
-    // DS.registerAdapter('firebase', DSFirebaseAdapter, { default: false });
+    // the firebase adapter was already registered
+    DS.adapters.firebase === DSFirebaseAdapter;
+    // but we want to make it the default
+    DS.registerAdapter('firebase', DSFirebaseAdapter, { default: true });
+    angular.forEach(DS.definitions, function (Resource) {
+      var ref = DSFirebaseAdapter.ref.child(Resource.endpoint);
 
-    // // Activate a mostly auto-sync with Firebase
-    // // The only thing missing is auto-sync TO Firebase
-    // // This will be easier with js-data 2.x, but right
-    // // now you still have to do DS.update('user', 1, { foo: 'bar' }), etc.
-    // angular.forEach(DS.definitions, function(Resource) {
-    //   var ref = DSFirebaseAdapter.ref.child(Resource.endpoint);
-    //   // Inject items into the store when they're added to Firebase
-    //   // Update items in the store when they're modified in Firebase
-    //   ref.on('child_changed', function(dataSnapshot) {
-    //     var data = dataSnapshot.val();
-    //     if (data[Resource.idAttribute]) {
-    //       Resource.inject(data);
-    //     }
-    //   });
-    //   // Eject items from the store when they're removed from Firebase
-    //   ref.on('child_removed', function(dataSnapshot) {
-    //     var data = dataSnapshot.val();
-    //     if (data[Resource.idAttribute]) {
-    //       Resource.eject(data[Resource.idAttribute]);
-    //     }
-    //   });
-    // });
+      ref.on('child_changed', function (dataSnapshot) {
+        var data = dataSnapshot.val();
+        if (data[Resource.idAttribute]) {
+          Resource.inject(data);
+        }
+      });
+      // Eject items from the store when they're removed from Firebase
+      ref.on('child_removed', function (dataSnapshot) {
+        var data = dataSnapshot.val();
+        if (data[Resource.idAttribute]) {
+          Resource.eject(data[Resource.idAttribute]);
+        }
+      });
+    });
   }]);
 })();
 'use strict';
@@ -265,16 +261,16 @@
   function RosterController(Positions, Players) {
     var _this = this;
 
-    //see if we have the players array and if it is empty
-    if (this.team && this.team.players && this.team.players.length == 0) {
-      //load the players for the team.
-      this.team.DSLoadRelations('player').then(function (data) {
-        //if no players found. Create them.
-        if (data && data.length == 0) {
-          _this.addPlayers();
-        }
-      });
-    }
+    // //see if we have the players array and if it is empty
+    // if (this.team && this.team.players && this.team.players.length == 0) {
+    //   //load the players for the team.
+    //   this.team.DSLoadRelations('player').then((data) => {
+    //     //if no players found. Create them.
+    //     if (data && data.length == 0) {
+    //       this.addPlayers();
+    //     }
+    //   });
+    // }
 
     this.positions = Positions;
 
@@ -292,6 +288,7 @@
 
     this.addPlayers = function () {
       for (var i = 1; i < 13; i++) {
+
         Players.create({ number: i, teamId: _this.team.id });
       }
     };
